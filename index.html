@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Plataformer — Aventura Multiclima</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #1a2334;
+font-family: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif; user-select: none; }
+#game { width: 100%; height: 100%; display: block; outline: none; }
+#hud {
+position: fixed; top: 0; left: 0; right: 0; padding: 14px 20px;
+display: none; align-items: center; gap: 22px; pointer-events: none;
+color: #fff; font-weight: bold; font-size: 22px;
+text-shadow: 0 2px 4px rgba(0,0,0,.55);
+}
+#hud img { height: 30px; vertical-align: middle; image-rendering: auto; }
+@keyframes hudPop { 0% { transform: scale(1); } 45% { transform: scale(1.45); } 100% { transform: scale(1); } }
+#coinCount, #gemCount { display: inline-block; }
+#coinCount.pop, #gemCount.pop { animation: hudPop .28s ease; }
+#hearts img { height: 32px; margin-right: 2px; }
+#heatBar { width: 70px; height: 12px; border: 2px solid rgba(255,255,255,.7); border-radius: 8px; overflow: hidden; background: rgba(0,0,0,.35); }
+#heatFill { height: 100%; width: 0%; background: #ffb23c; transition: width .15s linear; }
+.hudBox { display: flex; align-items: center; gap: 7px; }
+#timerBox { font-size: 18px; opacity: .9; }
+#medalHint { font-size: 15px; margin-left: 2px; }
+#levelName { margin-left: auto; font-size: 19px; opacity: .95; }
+#toast {
+position: fixed; top: 68px; left: 50%; transform: translateX(-50%) translateY(-12px);
+background: rgba(20,25,40,.85); color: #fff; padding: 10px 26px; border-radius: 22px;
+font-size: 19px; font-weight: bold; opacity: 0; transition: all .3s; pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#fade {
+position: fixed; inset: 0; background: #000; opacity: 1;
+transition: opacity .45s; pointer-events: none;
+}
+#flash {
+position: fixed; inset: 0; background: #fff; opacity: 0;
+pointer-events: none; z-index: 4;
+}
+.overlay {
+position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+background: rgba(10,14,25,.72); backdrop-filter: blur(4px); z-index: 10;
+}
+.overlay.show { display: flex; }
+.card {
+background: linear-gradient(160deg, #2b3a55, #1e2a40);
+border: 3px solid #4a6ea9; border-radius: 24px; padding: 36px 46px;
+color: #fff; text-align: center; box-shadow: 0 18px 60px rgba(0,0,0,.6);
+max-width: 860px; max-height: 90vh; overflow-y: auto;
+}
+h1 { font-size: 44px; letter-spacing: 1px; margin-bottom: 6px;
+background: linear-gradient(180deg,#ffe27a,#ff9d47);
+-webkit-background-clip: text; background-clip: text; color: transparent; }
+.subtitle { color: #a9c2e8; margin-bottom: 24px; font-size: 17px; }
+h2 { font-size: 30px; margin-bottom: 14px; }
+button {
+font-family: inherit; font-weight: bold; font-size: 18px; cursor: pointer;
+background: linear-gradient(180deg,#67c1ff,#3a8fe0); color: #fff;
+border: none; border-radius: 14px; padding: 12px 28px; margin: 6px;
+box-shadow: 0 4px 0 #23639f; transition: transform .08s;
+}
+button:hover { transform: translateY(-2px); }
+button:active { transform: translateY(1px); box-shadow: 0 2px 0 #23639f; }
+#charRow { display: flex; justify-content: center; gap: 14px; margin: 10px 0 6px; }
+.charCell { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.charCell small { color: #ffd75e; font-size: 12px; min-height: 15px; }
+.charPick {
+width: 64px; height: 64px; cursor: pointer; border-radius: 16px; padding: 6px;
+background: rgba(255,255,255,.07); border: 3px solid transparent; transition: all .15s;
+}
+.charPick:hover { transform: scale(1.1); }
+.charPick.sel { border-color: #ffd75e; background: rgba(255,215,94,.18); }
+.charPick.locked { filter: grayscale(1); opacity: .45; cursor: default; }
+.charPick.locked:hover { transform: none; }
+#starTotal { color: #ffd75e; font-size: 14px; margin-bottom: 20px; }
+#btnInfinite, #btnDaily {
+display: block; width: 100%; margin: 0 0 12px; padding: 14px; font-size: 21px;
+background: linear-gradient(180deg,#b06ef0,#7d3ad0); box-shadow: 0 4px 0 #55258f;
+}
+#btnInfinite:active { box-shadow: 0 2px 0 #55258f; }
+#btnInfinite small, #btnDaily small { display: block; font-size: 13px; font-weight: normal; opacity: .85; margin-top: 3px; }
+#btnDaily {
+background: linear-gradient(180deg,#f0a34e,#d0722a); box-shadow: 0 4px 0 #8f4a18;
+}
+#btnDaily:active { box-shadow: 0 2px 0 #8f4a18; }
+#btnEditor {
+display: block; width: 100%; margin: 0 0 18px; padding: 14px; font-size: 21px;
+background: linear-gradient(180deg,#4aa96c,#2f7d4c); box-shadow: 0 4px 0 #1d5433;
+}
+#btnEditor:active { box-shadow: 0 2px 0 #1d5433; }
+#btnEditor small { display: block; font-size: 13px; font-weight: normal; opacity: .85; margin-top: 3px; }
+#edMap {
+width: 100%; height: 170px; font-family: 'Menlo', 'Consolas', monospace; font-size: 12px;
+line-height: 1.25; white-space: pre; overflow: auto;
+background: #10182a; color: #cfe3ff; border: 2px solid #4a6ea9; border-radius: 10px;
+padding: 10px; resize: vertical; user-select: text; -webkit-user-select: text;
+}
+#edPalette { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.edPiece {
+display: flex; flex-direction: column; align-items: center; gap: 1px;
+padding: 4px 5px; margin: 0; border-radius: 8px; font-size: 10px; font-weight: normal;
+background: #16203a; border: 2px solid transparent; box-shadow: none; color: #cfe3ff;
+}
+.edPiece img, .edPiece .noimg { width: 22px; height: 22px; image-rendering: pixelated; font-size: 16px; line-height: 22px; }
+.edPiece.sel { border-color: #ffd75e; background: #2a3552; }
+.edPiece:active { transform: none; box-shadow: none; }
+#edPreviewBox {
+overflow: auto; max-height: 340px; border: 2px solid #4a6ea9; border-radius: 10px;
+background: #0c1322; margin-bottom: 8px;
+}
+#edPreview { display: block; image-rendering: pixelated; cursor: crosshair; touch-action: none; }
+#edTheme {
+font-family: inherit; font-size: 15px; padding: 4px 8px; border-radius: 8px;
+background: #16203a; color: #fff; border: 1px solid #4a6ea9;
+}
+#levelGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.levelBtn {
+display: flex; flex-direction: column; gap: 3px; align-items: center;
+padding: 16px 10px; border-radius: 16px; margin: 0;
+background: linear-gradient(180deg,#4aa96c,#2f7d4c); box-shadow: 0 4px 0 #1d5433;
+}
+.levelBtn b { font-size: 26px; }
+.levelBtn span { font-size: 15px; }
+.levelBtn small { font-size: 12px; opacity: .8; }
+.levelBtn.locked {
+background: linear-gradient(180deg,#5a6272,#3d4350); box-shadow: 0 4px 0 #272b33;
+cursor: default; opacity: .55; transform: none !important;
+}
+.help { color: #8fa8cc; font-size: 14px; line-height: 1.7; }
+kbd {
+background: #16203a; border: 1px solid #4a6ea9; border-radius: 6px;
+padding: 1px 8px; font-family: inherit; font-size: 13px;
+}
+#panelStats { font-size: 26px; margin: 18px 0 22px; }
+#panelStats img { height: 30px; vertical-align: middle; }
+#livesBox img { height: 24px; vertical-align: middle; image-rendering: pixelated; margin-right: 2px; }
+#goStats { margin: 14px 0 6px; }
+#shopItems { margin: 6px 0 16px; text-align: left; }
+.shopItem {
+display: flex; align-items: center; gap: 12px; padding: 10px 12px; margin: 8px 0;
+background: #16203a; border: 1px solid #3a527d; border-radius: 12px;
+}
+.shopIco { font-size: 30px; width: 38px; text-align: center; }
+.shopIco img { width: 30px; height: 30px; image-rendering: pixelated; vertical-align: middle; }
+.shopInfo { flex: 1; display: flex; flex-direction: column; }
+.shopInfo small { color: #8fa8cc; font-size: 12px; margin-top: 2px; }
+.shopBuy {
+margin: 0; padding: 10px 16px; font-size: 16px; white-space: nowrap;
+background: linear-gradient(180deg,#f0b84e,#d0902a); box-shadow: 0 3px 0 #8f5f18;
+}
+.shopBuy:active { box-shadow: 0 1px 0 #8f5f18; }
+.shopBuy:disabled { background: #5a6272; box-shadow: 0 3px 0 #272b33; cursor: default; }
+.volRow { margin: 14px 0 6px; font-size: 17px; color: #a9c2e8; }
+.volRow input { vertical-align: middle; width: 180px; accent-color: #67c1ff; cursor: pointer; }
+#touch {
+position: fixed; inset: 0; display: none; pointer-events: none; z-index: 5;
+-webkit-user-select: none; user-select: none; touch-action: none;
+}
+.tside {
+position: absolute; bottom: max(18px, env(safe-area-inset-bottom));
+display: flex; align-items: flex-end; gap: 12px;
+}
+.tside.l { left: 16px; }
+.tside.r { right: 16px; }
+.tbtn {
+pointer-events: auto; display: flex; align-items: center; justify-content: center;
+width: 64px; height: 64px; border-radius: 50%;
+background: rgba(30,42,64,.42); border: 2px solid rgba(255,255,255,.55);
+color: #fff; font-size: 24px; font-weight: bold;
+text-shadow: 0 1px 3px rgba(0,0,0,.7); touch-action: none;
+}
+.tbtn.big { width: 84px; height: 84px; font-size: 30px; }
+.tbtn.on { background: rgba(120,190,255,.6); }
+.tbtn.tpause { position: absolute; top: max(16px, env(safe-area-inset-top)); right: 16px; width: 46px; height: 46px; font-size: 17px; }
+#rotate {
+position: fixed; inset: 0; z-index: 20; display: none;
+align-items: center; justify-content: center; text-align: center;
+background: #10182a; color: #cfe3ff; padding: 30px;
+font-family: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+}
+#rotate .ico { font-size: 64px; display: block; margin-bottom: 16px; animation: rotateHint 2s ease-in-out infinite; }
+#rotate b { font-size: 22px; }
+#rotate span { display: block; margin-top: 8px; font-size: 15px; color: #8fa8cc; }
+@keyframes rotateHint { 0%,100% { transform: rotate(-12deg); } 50% { transform: rotate(78deg); } }
+@media (orientation: portrait) and (pointer: coarse) { #rotate { display: flex; } }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="hud">
+<div class="hudBox" id="hearts"></div>
+<div class="hudBox" id="livesBox" style="display:none"></div>
+<div class="hudBox" id="heatBox" style="display:none"><span id="heatIcon">☀️</span><div id="heatBar"><div id="heatFill"></div></div></div>
+<div class="hudBox"><img src="assets/kenney_new-platformer-pack-1.1/Sprites/Tiles/Default/hud_coin.png"><span id="coinCount">× 0</span></div>
+<div class="hudBox"><img src="assets/kenney_new-platformer-pack-1.1/Sprites/Tiles/Default/gem_blue.png"><span id="gemCount">× 0</span></div>
+<div class="hudBox"><img id="keyIcon" src="assets/kenney_new-platformer-pack-1.1/Sprites/Tiles/Default/hud_key_yellow.png" style="visibility:hidden"></div>
+<div class="hudBox"><img id="starIcon" src="assets/kenney_new-platformer-pack-1.1/Sprites/Tiles/Default/star.png" style="opacity:.25"></div>
+<div class="hudBox" id="powers"></div>
+<div class="hudBox" id="timerBox">⏱ <span id="timer">0:00.0</span><span id="medalHint"></span></div>
+<div id="levelName"></div>
+</div>
+<div id="toast"></div>
+<div id="rotate">
+<div>
+<span class="ico">📱</span>
+<b>Gira el teléfono</b>
+<span>Este juego se ve mejor en horizontal</span>
+</div>
+</div>
+<div id="touch">
+<div class="tbtn tpause" id="touchPause">⏸</div>
+<div class="tside l">
+<div class="tbtn" data-k="left">◀</div>
+<div class="tbtn" data-k="right">▶</div>
+</div>
+<div class="tside r">
+<div class="tbtn" data-k="down">▼</div>
+<div class="tbtn" data-k="up">▲</div>
+<div class="tbtn" data-k="sprint">B</div>
+<div class="tbtn big" data-k="jump">A</div>
+</div>
+</div>
+<div id="menu" class="overlay show">
+<div class="card">
+<h1>PLATAFORMER</h1>
+<div class="subtitle">Una aventura por 12 mundos con climas distintos · Babylon.js + assets de Kenney</div>
+<h2 style="font-size:20px">Elige tu personaje</h2>
+<div id="charRow"></div>
+<div id="starTotal"></div>
+<button id="btnInfinite">∞ MODO INFINITO<small id="infBest"></small></button>
+<button id="btnDaily">📅 RETO DIARIO<small id="dailyBest"></small></button>
+<button id="btnEditor">✏️ EDITOR DE NIVELES<small>Crea tu nivel y compártelo por URL</small></button>
+<div id="levelGrid"></div>
+<div class="help">
+<kbd>←</kbd> <kbd>→</kbd> o <kbd>A</kbd> <kbd>D</kbd> moverse &nbsp;·&nbsp;
+<kbd>Espacio</kbd> / <kbd>↑</kbd> saltar &nbsp;·&nbsp; <kbd>↑</kbd> <kbd>↓</kbd> escaleras &nbsp;·&nbsp;
+<kbd>↓</kbd> agacharse &nbsp;·&nbsp; <kbd>Shift</kbd> sprint (con el poder)<br>
+<kbd>Esc</kbd> pausa &nbsp;·&nbsp; <kbd>R</kbd> reiniciar nivel &nbsp;·&nbsp; <kbd>M</kbd> silenciar
+&nbsp;·&nbsp; 🎮 mando y 📱 táctil compatibles<br>
+Salta sobre los enemigos para aplastarlos (¡cuidado con los de pinchos y fuego!) ·
+Busca la ⭐ secreta de cada nivel: desbloquean personajes<br>
+Poderes ocultos: 💚 doble salto · 🔥 sprint · 🍄 rebote · 🪂 planeo · 🧲 imán · 🏮 farol · 🥾 crampones · 💨 dash (Shift en el aire) · 💥 golpe de suelo (abajo en el aire)<br>
+☀️ El sol quema (busca sombra) · 💨 viento a ráfagas · 🧊 estalactitas y agua helada · ⚡ rayos en la ciénaga · 🌋 rocas de lava · 🌑 cuevas a oscuras
+</div>
+<div class="volRow">🔊 <input type="range" id="volMenu" min="0" max="100"></div>
+</div>
+</div>
+<div id="panel" class="overlay">
+<div class="card">
+<h2 id="panelTitle">¡Nivel superado!</h2>
+<div id="panelStats"></div>
+<button id="btnNext">Siguiente nivel ➜</button>
+<button id="btnShop" style="display:none">🛒 Tienda</button>
+<button id="btnReplay">Repetir</button>
+<button id="btnMenu">Menú</button>
+</div>
+</div>
+<div id="gameover" class="overlay">
+<div class="card">
+<h2>💀 Game Over</h2>
+<div id="goStats"></div>
+<div style="margin-top:18px">
+<button id="btnGoContinue">▶ Continuar</button>
+<button id="btnGoShop">🛒 Tienda</button>
+<button id="btnGoRetry">↺ Empezar de nuevo</button>
+<button id="btnGoMenu">Menú</button>
+</div>
+</div>
+</div>
+<div id="shop" class="overlay">
+<div class="card" style="max-width:560px">
+<h2>🛒 Tienda</h2>
+<div id="shopWallet" class="volRow"></div>
+<div id="shopItems"></div>
+<button id="btnShopBack">Volver</button>
+</div>
+</div>
+<div id="editor" class="overlay">
+<div class="card" style="text-align:left;max-width:1000px;width:92vw">
+<h2 style="text-align:center">✏️ Editor de niveles</h2>
+<div style="margin-bottom:8px">
+Tema: <select id="edTheme"></select>
+<span class="help" style="font-size:12px;margin-left:10px">Elige una pieza y pinta sobre la vista previa · clic derecho (o pieza ✖) borra</span>
+</div>
+<div id="edPalette"></div>
+<div id="edPreviewBox"><canvas id="edPreview"></canvas></div>
+<div class="help" style="font-size:11px;line-height:1.5;margin-bottom:6px">
+El mapa también se puede editar como texto (añade filas/columnas con líneas y espacios):
+<b>X</b> suelo · <b>P</b> inicio · <b>F</b> meta · <b>c</b> moneda · <b>g</b> gema · <b>*</b> estrella ·
+<b>~</b> agua/lava · <b>H</b> escalera · <b>^</b> pinchos · <b>S</b> resorte · <b>-</b> nube ·
+<b>m/v</b> plataformas móviles · <b>&gt;/&lt;</b> cintas · <b>o</b> bloque sorpresa · <b>x</b> tablones ·
+<b>K</b> llave · <b>L</b> candado · <b>C</b> checkpoint · <b>t</b> antorcha · <b>b</b> deco ·
+<b>E/B/G/Y/Z/A</b> enemigos · <b>J</b> jefe · <b>M</b> barrera del jefe · <b>1-9</b> poderes
+</div>
+<textarea id="edMap" spellcheck="false"></textarea>
+<div style="text-align:center;margin-top:10px">
+<button id="btnEdPlay">▶ Probar</button>
+<button id="btnEdShare">🔗 Copiar enlace</button>
+<button id="btnEdCode">📋 Copiar código</button>
+<button id="btnEdImport">📥 Pegar código</button>
+<button id="btnEdBack">Menú</button>
+</div>
+</div>
+</div>
+<div id="pause" class="overlay">
+<div class="card">
+<h2>Pausa</h2>
+<div class="volRow">🔊 <input type="range" id="volPause" min="0" max="100"></div>
+<button id="btnResume">Continuar</button>
+<button id="btnPauseMenu">Menú</button>
+</div>
+</div>
+<div id="flash"></div>
+<div id="fade"></div>
+<script src="lib/babylon.js?v=2"></script>
+<script src="js/app.min.js?v=ad9d809d9c"></script></body>
+</html>
