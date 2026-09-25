@@ -64,6 +64,22 @@ box-shadow: 0 4px 0 #23639f; transition: transform .08s;
 }
 button:hover { transform: translateY(-2px); }
 button:active { transform: translateY(1px); box-shadow: 0 2px 0 #23639f; }
+button:disabled, button.locked { opacity: .5; cursor: default; filter: grayscale(.5); }
+button:disabled:hover, button.locked:hover { transform: none; }
+#signBubble {
+position: fixed; z-index: 6; max-width: 340px; transform: translate(-50%, -100%);
+display: none; align-items: center; gap: 10px; pointer-events: none;
+background: rgba(20,25,40,.92); color: #eaf2ff; border: 2px solid #ffd75e;
+border-radius: 14px; padding: 10px 14px; font-size: 15px; line-height: 1.35;
+box-shadow: 0 8px 24px rgba(0,0,0,.5);
+}
+#signBubble.show { display: flex; }
+#signBubble::after {   
+content: ''; position: absolute; bottom: -9px; left: 50%; transform: translateX(-50%);
+border: 8px solid transparent; border-top-color: #ffd75e;
+}
+#signBubble .signIco img { width: 34px; height: 34px; image-rendering: pixelated; }
+#signBubble .signTxt b { color: #ffd75e; }
 #charRow { display: flex; justify-content: center; gap: 14px; margin: 10px 0 6px; }
 .charCell { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .charCell small { color: #ffd75e; font-size: 12px; min-height: 15px; }
@@ -92,6 +108,35 @@ background: linear-gradient(180deg,#4aa96c,#2f7d4c); box-shadow: 0 4px 0 #1d5433
 }
 #btnEditor:active { box-shadow: 0 2px 0 #1d5433; }
 #btnEditor small { display: block; font-size: 13px; font-weight: normal; opacity: .85; margin-top: 3px; }
+#btnGuide {
+display: block; width: 100%; margin: 0 0 18px; padding: 14px; font-size: 21px;
+background: linear-gradient(180deg,#4a9ecf,#2a6f9a); box-shadow: 0 4px 0 #1c4d6d;
+}
+#btnGuide:active { box-shadow: 0 2px 0 #1c4d6d; }
+#btnGuide small { display: block; font-size: 13px; font-weight: normal; opacity: .85; margin-top: 3px; }
+.codexChip {
+display: inline-block; background: #16203a; border: 1px solid #4a6ea9; color: #cfe3ff;
+border-radius: 20px; padding: 3px 14px; font-size: 14px; margin-bottom: 10px;
+}
+.codexBig {
+display: flex; align-items: center; justify-content: center; height: 104px; margin-bottom: 6px;
+}
+.codexBig img { image-rendering: pixelated; }
+.codexText { font-size: 17px; line-height: 1.5; color: #dbe7fb; margin-bottom: 20px; }
+#codexList { max-height: 62vh; overflow-y: auto; padding-right: 6px; }
+.codexCatHead {
+font-size: 18px; color: #ffd75e; margin: 14px 0 6px; position: sticky; top: 0;
+background: linear-gradient(160deg,#2b3a55,#1e2a40); padding: 4px 0;
+}
+.codexRow {
+display: flex; align-items: center; gap: 14px; padding: 8px 10px; margin: 6px 0;
+background: #16203a; border: 1px solid #3a527d; border-radius: 12px;
+}
+.codexRowImg { width: 48px; text-align: center; flex-shrink: 0; }
+.codexRowImg img { image-rendering: pixelated; }
+.codexRowInfo { display: flex; flex-direction: column; }
+.codexRowInfo b { font-size: 16px; }
+.codexRowInfo small { color: #a9c2e8; font-size: 13px; margin-top: 2px; line-height: 1.4; }
 #edMap {
 width: 100%; height: 170px; font-family: 'Menlo', 'Consolas', monospace; font-size: 12px;
 line-height: 1.25; white-space: pre; overflow: auto;
@@ -203,6 +248,7 @@ font-family: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
 <div id="levelName"></div>
 </div>
 <div id="toast"></div>
+<div id="signBubble"></div>
 <div id="rotate">
 <div>
 <span class="ico">📱</span>
@@ -232,7 +278,8 @@ font-family: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
 <div id="starTotal"></div>
 <button id="btnInfinite">∞ MODO INFINITO<small id="infBest"></small></button>
 <button id="btnDaily">📅 RETO DIARIO<small id="dailyBest"></small></button>
-<button id="btnEditor">✏️ EDITOR DE NIVELES<small>Crea tu nivel y compártelo por URL</small></button>
+<button id="btnEditor">✏️ EDITOR DE NIVELES<small id="editorNote">Crea tu nivel y compártelo por código</small></button>
+<button id="btnGuide">📖 GUÍA DEL JUEGO<small>Enemigos, objetos y mecánicas explicados</small></button>
 <div id="levelGrid"></div>
 <div class="help">
 <kbd>←</kbd> <kbd>→</kbd> o <kbd>A</kbd> <kbd>D</kbd> moverse &nbsp;·&nbsp;
@@ -278,6 +325,26 @@ Poderes ocultos: 💚 doble salto · 🔥 sprint · 🍄 rebote · 🪂 planeo �
 <button id="btnShopBack">Volver</button>
 </div>
 </div>
+<div id="codex" class="overlay">
+<div class="card" style="max-width:520px">
+<div id="codexCat" class="codexChip"></div>
+<div id="codexImg" class="codexBig"></div>
+<h2 id="codexName" style="margin-bottom:8px"></h2>
+<p id="codexText" class="codexText"></p>
+<button id="btnCodexOk">¡Entendido!</button>
+</div>
+</div>
+<div id="codexBook" class="overlay">
+<div class="card" style="max-width:660px;width:92vw;text-align:left">
+<h2 style="text-align:center">📖 Guía del juego</h2>
+<p class="help" style="text-align:center;margin-bottom:10px">La primera vez que te cruzas con algo nuevo, el juego te lo explica. Aquí lo tienes todo junto.</p>
+<div id="codexList"></div>
+<div style="text-align:center;margin-top:14px">
+<button id="btnCodexReset">↺ Volver a ver los tutoriales</button>
+<button id="btnCodexBack">Menú</button>
+</div>
+</div>
+</div>
 <div id="editor" class="overlay">
 <div class="card" style="text-align:left;max-width:1000px;width:92vw">
 <h2 style="text-align:center">✏️ Editor de niveles</h2>
@@ -289,11 +356,15 @@ Tema: <select id="edTheme"></select>
 <div id="edPreviewBox"><canvas id="edPreview"></canvas></div>
 <div class="help" style="font-size:11px;line-height:1.5;margin-bottom:6px">
 El mapa también se puede editar como texto (añade filas/columnas con líneas y espacios):
-<b>X</b> suelo · <b>P</b> inicio · <b>F</b> meta · <b>c</b> moneda · <b>g</b> gema · <b>*</b> estrella ·
-<b>~</b> agua/lava · <b>H</b> escalera · <b>^</b> pinchos · <b>S</b> resorte · <b>-</b> nube ·
+<b>X</b> suelo · <b>P</b> inicio · <b>F</b> meta · <b>c</b> moneda · <b>g</b> gema · <b>j</b> rubí ·
+<b>h</b> corazón · <b>*</b> estrella · <b>~</b> agua/lava · <b>H</b> escalera · <b>^</b> pinchos ·
+<b>S</b> resorte · <b>-</b> nube · <b>/</b> y <b>\</b> rampas · <b>u</b> puente frágil ·
 <b>m/v</b> plataformas móviles · <b>&gt;/&lt;</b> cintas · <b>o</b> bloque sorpresa · <b>x</b> tablones ·
+<b>i</b> bomba · <b>l</b> palanca · <b>[</b> y <b>]</b> bloques azul/rojo ·
 <b>K</b> llave · <b>L</b> candado · <b>C</b> checkpoint · <b>t</b> antorcha · <b>b</b> deco ·
-<b>E/B/G/Y/Z/A</b> enemigos · <b>J</b> jefe · <b>M</b> barrera del jefe · <b>1-9</b> poderes
+<b>?</b> cartel (el texto se escribe en <i>signs</i>, solo en niveles de campaña) ·
+<b>E/B/G/Y/Z/A/p/n/w/d/r/y/f/q/V</b> enemigos · <b>J</b> jefe · <b>M</b> barrera del jefe ·
+<b>1-9</b> y <b>0</b> poderes
 </div>
 <textarea id="edMap" spellcheck="false"></textarea>
 <div style="text-align:center;margin-top:10px">
@@ -316,5 +387,5 @@ El mapa también se puede editar como texto (añade filas/columnas con líneas y
 <div id="flash"></div>
 <div id="fade"></div>
 <script src="lib/babylon.js?v=2"></script>
-<script src="js/app.min.js?v=ad9d809d9c"></script></body>
+<script src="js/app.min.js?v=82e2167dc3"></script></body>
 </html>
