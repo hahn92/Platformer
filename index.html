@@ -27,14 +27,14 @@ text-shadow: 0 2px 4px rgba(0,0,0,.55);
 #medalHint { font-size: 15px; margin-left: 2px; }
 #levelName { margin-left: auto; font-size: 19px; opacity: .95; }
 #toast {
-position: fixed; top: 68px; left: 50%; transform: translateX(-50%) translateY(-12px);
-background: rgba(20,25,40,.85); color: #fff; padding: 10px 26px; border-radius: 22px;
-font-size: 19px; font-weight: bold; opacity: 0; transition: all .3s; pointer-events: none;
+position: fixed; top: 64px; left: 50%; transform: translateX(-50%) translateY(-10px);
+background: rgba(20,25,40,.72); color: #fff; padding: 6px 16px; border-radius: 16px;
+font-size: 15px; font-weight: bold; opacity: 0; transition: all .3s; pointer-events: none;
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .floatTxt {
 position: fixed; z-index: 5; pointer-events: none; white-space: nowrap;
-font-size: 22px; font-weight: bold; color: #ffd75e;
+font-size: 17px; font-weight: bold; color: #ffd75e;
 text-shadow: 0 2px 0 rgba(0,0,0,.55), 0 0 8px rgba(0,0,0,.35);
 transform: translate(-50%, -50%); animation: floatUp .9s ease-out forwards;
 }
@@ -78,18 +78,29 @@ button:active { transform: translateY(1px); box-shadow: 0 2px 0 #23639f; }
 button:disabled, button.locked { opacity: .5; cursor: default; filter: grayscale(.5); }
 button:disabled:hover, button.locked:hover { transform: none; }
 #signBubble {
-position: fixed; z-index: 6; max-width: 340px; transform: translate(-50%, -100%);
-display: none; align-items: center; gap: 10px; pointer-events: none;
-background: rgba(20,25,40,.92); color: #eaf2ff; border: 2px solid #ffd75e;
-border-radius: 14px; padding: 10px 14px; font-size: 15px; line-height: 1.35;
-box-shadow: 0 8px 24px rgba(0,0,0,.5);
+position: fixed; z-index: 6; max-width: 270px; transform: translate(-50%, -100%);
+display: flex; align-items: center; gap: 8px; pointer-events: none;
+background: rgba(20,25,40,.82); color: #eaf2ff; border: 1.5px solid rgba(255,215,94,.75);
+border-radius: 10px; padding: 7px 10px; font-size: 13px; line-height: 1.35;
+box-shadow: 0 4px 14px rgba(0,0,0,.35);
+opacity: 0; visibility: hidden; transition: opacity .2s, visibility .2s;
 }
-#signBubble.show { display: flex; }
+#signBubble.show { opacity: 1; visibility: visible; }
 #signBubble::after {   
-content: ''; position: absolute; bottom: -9px; left: 50%; transform: translateX(-50%);
-border: 8px solid transparent; border-top-color: #ffd75e;
+content: ''; position: absolute; bottom: -7px; left: 50%; transform: translateX(-50%);
+border: 6px solid transparent; border-top-color: rgba(255,215,94,.75);
 }
-#signBubble .signIco img { width: 34px; height: 34px; image-rendering: pixelated; }
+#signBubble .signIco img { width: 26px; height: 26px; image-rendering: pixelated; }
+#signPeek {
+position: fixed; z-index: 6; pointer-events: none; font-size: 15px;
+background: rgba(20,25,40,.7); border-radius: 10px; padding: 1px 7px;
+transform: translate(-50%, -100%); opacity: 0; transition: opacity .2s;
+}
+#signPeek.show { opacity: .9; animation: peekBob 1.2s ease-in-out infinite; }
+@keyframes peekBob {
+0%, 100% { transform: translate(-50%, -100%); }
+50%      { transform: translate(-50%, -125%); }
+}
 #signBubble .signTxt b { color: #ffd75e; }
 #charRow { display: flex; justify-content: center; gap: 14px; margin: 10px 0 6px; }
 .charCell { display: flex; flex-direction: column; align-items: center; gap: 2px; }
@@ -125,15 +136,16 @@ background: linear-gradient(180deg,#4a9ecf,#2a6f9a); box-shadow: 0 4px 0 #1c4d6d
 }
 #btnGuide:active { box-shadow: 0 2px 0 #1c4d6d; }
 #btnGuide small { display: block; font-size: 13px; font-weight: normal; opacity: .85; margin-top: 3px; }
-.codexChip {
-display: inline-block; background: #16203a; border: 1px solid #4a6ea9; color: #cfe3ff;
-border-radius: 20px; padding: 3px 14px; font-size: 14px; margin-bottom: 10px;
+#hint {
+position: fixed; top: 58px; left: 14px; z-index: 5; max-width: 300px;
+display: flex; align-items: center; gap: 9px; pointer-events: none;
+background: rgba(20,25,40,.78); color: #dbe7fb; border-left: 3px solid #ffd75e;
+border-radius: 8px; padding: 7px 11px; font-size: 13px; line-height: 1.35;
+opacity: 0; transform: translateX(-12px); transition: opacity .3s, transform .3s;
 }
-.codexBig {
-display: flex; align-items: center; justify-content: center; height: 104px; margin-bottom: 6px;
-}
-.codexBig img { image-rendering: pixelated; }
-.codexText { font-size: 17px; line-height: 1.5; color: #dbe7fb; margin-bottom: 20px; }
+#hint.show { opacity: 1; transform: translateX(0); }
+#hint img { width: 28px; height: 28px; image-rendering: pixelated; flex: none; }
+#hint b { color: #ffd75e; }
 #codexList { max-height: 62vh; overflow-y: auto; padding-right: 6px; }
 .codexCatHead {
 font-size: 18px; color: #ffd75e; margin: 14px 0 6px; position: sticky; top: 0;
@@ -260,6 +272,8 @@ font-family: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
 </div>
 <div id="toast"></div>
 <div id="signBubble"></div>
+<div id="signPeek">💬</div>
+<div id="hint"></div>
 <div id="rotate">
 <div>
 <span class="ico">📱</span>
@@ -337,15 +351,6 @@ Poderes ocultos: 💚 doble salto · 🔥 sprint · 🍄 rebote · 🪂 planeo �
 <button id="btnShopBack">Volver</button>
 </div>
 </div>
-<div id="codex" class="overlay">
-<div class="card" style="max-width:520px">
-<div id="codexCat" class="codexChip"></div>
-<div id="codexImg" class="codexBig"></div>
-<h2 id="codexName" style="margin-bottom:8px"></h2>
-<p id="codexText" class="codexText"></p>
-<button id="btnCodexOk">¡Entendido!</button>
-</div>
-</div>
 <div id="codexBook" class="overlay">
 <div class="card" style="max-width:660px;width:92vw;text-align:left">
 <h2 style="text-align:center">📖 Guía del juego</h2>
@@ -400,5 +405,5 @@ El mapa también se puede editar como texto (añade filas/columnas con líneas y
 <div id="flash"></div>
 <div id="fade"></div>
 <script src="lib/babylon.js?v=2"></script>
-<script src="js/app.min.js?v=3c5cfca741"></script></body>
+<script src="js/app.min.js?v=f1ceb7cbd6"></script></body>
 </html>
