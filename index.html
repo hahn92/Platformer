@@ -223,6 +223,14 @@ background: linear-gradient(180deg,#f0b84e,#d0902a); box-shadow: 0 3px 0 #8f5f18
 .shopBuy:disabled { background: #5a6272; box-shadow: 0 3px 0 #272b33; cursor: default; }
 .volRow { margin: 14px 0 6px; font-size: 17px; color: #a9c2e8; }
 .volRow input { vertical-align: middle; width: 150px; accent-color: #67c1ff; cursor: pointer; }
+#btnCredits {
+font-size: 14px; padding: 6px 16px; margin-top: 10px;
+background: rgba(255,255,255,.08); color: #a9c2e8; box-shadow: none;
+}
+#btnCredits:active { box-shadow: none; }
+.creditRow { margin: 14px 0; line-height: 1.5; font-size: 15px; color: #dbe7fb; }
+.creditRow b { display: block; color: #ffd75e; margin-bottom: 2px; }
+#credits a { color: #7ec8ff; white-space: nowrap; }
 #touch {
 position: fixed; inset: 0; display: none; pointer-events: none; z-index: 5;
 -webkit-user-select: none; user-select: none; touch-action: none;
@@ -319,6 +327,7 @@ Poderes ocultos: 💚 doble salto · 🔥 sprint · 🍄 rebote · 🪂 planeo �
 </div>
 <div class="volRow"><span title="Volumen general">🔊</span> <input type="range" id="volMenu" min="0" max="100" title="Volumen general">
 &nbsp; <span title="Música">🎵</span> <input type="range" id="musMenu" min="0" max="100" title="Música"></div>
+<button id="btnCredits">📜 Créditos</button>
 </div>
 </div>
 <div id="panel" class="overlay">
@@ -360,6 +369,29 @@ Poderes ocultos: 💚 doble salto · 🔥 sprint · 🍄 rebote · 🪂 planeo �
 <button id="btnCodexReset">↺ Volver a ver los tutoriales</button>
 <button id="btnCodexBack">Menú</button>
 </div>
+</div>
+</div>
+<div id="credits" class="overlay">
+<div class="card" style="max-width:640px;width:92vw">
+<h2>📜 Créditos</h2>
+<p class="subtitle"><b>Plataformer</b>, un juego de hahndev</p>
+<div class="creditRow">
+<b>Gráficos y efectos de sonido</b>
+«<a href="https://kenney.nl/assets/new-platformer-pack" target="_blank" rel="noopener">New Platformer Pack</a>»
+de <a href="https://www.kenney.nl" target="_blank" rel="noopener">Kenney</a> · licencia CC0 (dominio público)
+</div>
+<div class="creditRow">
+<b>Motor</b>
+<a href="https://www.babylonjs.com" target="_blank" rel="noopener">Babylon.js</a> <span id="babylonVer"></span>
+· © 2023 The Babylon.js team ·
+<a href="lib/LICENSE-babylonjs.txt" target="_blank" rel="noopener">licencia Apache 2.0</a>
+</div>
+<div class="creditRow">
+<b>Música, ambiente y el resto de efectos</b>
+Los compone y sintetiza el propio juego mientras juegas, con Web Audio
+</div>
+<p class="help">Gracias a Kenney por regalar sus recursos al dominio público.</p>
+<button id="btnCreditsBack">Menú</button>
 </div>
 </div>
 <div id="editor" class="overlay">
@@ -405,5 +437,5 @@ El mapa también se puede editar como texto (añade filas/columnas con líneas y
 <div id="flash"></div>
 <div id="fade"></div>
 <script src="lib/babylon.js?v=2"></script>
-<script src="js/app.min.js?v=80ca8df0f9"></script></body>
+<script src="js/app.min.js?v=9c7c5080d3"></script></body>
 </html>
